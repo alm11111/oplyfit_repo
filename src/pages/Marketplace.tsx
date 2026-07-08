@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from '../lib/api'
+import { api, API_BASE_URL } from '../lib/api'
 import { Badge, Button, Card, Input } from '../components/ui'
 
 type ProductCategory = 'PtSession' | 'NutritionPlan' | 'Merchandise' | 'Event' | 'DayPass' | 'Other'
@@ -152,7 +152,7 @@ function EditProductModal({ product, onClose }: { product: ProductDto; onClose: 
       if (!photoFile) return
       const fd = new FormData()
       fd.append('photo', photoFile)
-      await fetch(`/api/v1/marketplace/products/${productId}/photo`, {
+      await fetch(`${API_BASE_URL}/api/v1/marketplace/products/${productId}/photo`, {
         method: 'POST',
         body: fd,
         headers: { Authorization: `Bearer ${localStorage.getItem('fitcore_token')}` },

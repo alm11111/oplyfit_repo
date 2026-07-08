@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { api } from '../lib/api'
+import { api, API_BASE_URL } from '../lib/api'
 import { Badge } from '../components/ui'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -118,7 +118,7 @@ export default function Contracts() {
       fd.append('pdf', file)
       fd.append('signerEmail', email)
       fd.append('signerName', contracts.find(c => c.id === id)?.memberName ?? '')
-      return fetch(`/api/v1/contracts/${id}/send`, {
+      return fetch(`${API_BASE_URL}/api/v1/contracts/${id}/send`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${localStorage.getItem('fitcore_token')}` },
         body: fd,

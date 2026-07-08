@@ -1,5 +1,9 @@
 // Thin typed client over the FitCore API. The JWT carries gym_id, so requests need no X-Tenant header.
 
+// Empty in dev (Vite proxies /api to localhost:5076); set VITE_API_BASE_URL to the backend's
+// absolute origin for a static production build (no proxy available once deployed).
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
+
 const TOKEN_KEY = 'fitcore_token'
 const REFRESH_KEY = 'fitcore_refresh'
 
@@ -48,7 +52,7 @@ async function silentRefresh(): Promise<string> {
   _refreshPromise = (async () => {
     const refreshToken = getRefreshToken()
     if (!refreshToken) throw new Error('no refresh token')
-    const res = await fetch('/api/v1/auth/refresh', {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
@@ -70,7 +74,7 @@ function clearSession() {
 
 async function request<T>(path: string, init?: RequestInit, isRetry = false): Promise<Envelope<T>> {
   const token = getToken()
-  const res = await fetch(path, {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
@@ -129,7 +133,7 @@ export const api = {
   // Download binary file (PDF, etc.) — triggers browser save dialog
   async downloadFile(path: string, filename: string, isRetry = false): Promise<void> {
     const token = getToken()
-    const res = await fetch(path, {
+    const res = await fetch(`${API_BASE_URL}${path}`, {
       headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     })
 
@@ -174,7 +178,7 @@ export const api = {
   // Multipart file upload — browser sets Content-Type with boundary automatically
   async upload<T>(path: string, formData: FormData): Promise<T> {
     const token = getToken()
-    const res = await fetch(path, {
+    const res = await fetch(`${API_BASE_URL}${path}`, {
       method: 'POST',
       headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: formData,
@@ -198,7 +202,7 @@ export interface AuthTokens {
 }
 
 export async function login(email: string, password: string): Promise<AuthTokens> {
-  const res = await fetch('/api/v1/auth/login', {
+  const res = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
